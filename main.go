@@ -38,6 +38,10 @@ func parent() {
 }
 
 func child() {
+	must(syscall.Mount("rootfs", "rootfs", "", syscall.MS_BIND, ""))
+	must(os.MkdirAll("rootfs/oldrootfs", 0700))
+	must(syscall.PivotRoot("rootfs", "rootfs/oldrootfs"))
+	must(os.Chdir("/"))
 	cmd := exec.Command(os.Args[2], os.Args[3:]...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
@@ -46,5 +50,11 @@ func child() {
 	if err := cmd.Run(); err != nil {
 		fmt.Println("ERROR", err)
 		os.Exit(1)
+	}
+}
+
+func must(e error) {
+	if e != nil {
+		panic(e)
 	}
 }
